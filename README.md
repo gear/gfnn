@@ -43,4 +43,4 @@ The frequency experiment (Figure 3) can be found in `transformation.py` and `raw
 
 ## Acknowledgement
 This reposipory is built upon SGC, FastGCN, and GCN. I would like to say thanks
-to the authors of these repository for making their code available.
+to the authors of these repositories for making their code available.
