@@ -15,7 +15,7 @@ torchvision
 ```
 Or install from `requirements.txt`.
 
-Move files in `data/*` to your `~/data/` folder, or change the paths in `utils.py` for Cora, Citeseer, Pubmed. The data files can be found [here (Gdrive)](https://drive.google.com/open?id=1ruxemElzwiXXErR7c7DE8BhRtZ7cxnP4).
+Move files in `data/*` to your `~/data/gcn/` folder, or change the paths in `utils.py` for Cora, Citeseer, Pubmed. The data files can be found [here (Gdrive)](https://drive.google.com/open?id=1ruxemElzwiXXErR7c7DE8BhRtZ7cxnP4).
 
 For Reddit, download [reddit.adj (Gdrive)](https://drive.google.com/file/d/174vb0Ws7Vxk_QTUtxqTgDHSQ4El4qDHt/view) and [reddit.npz (Gdrive)](https://drive.google.com/file/d/19SphVl_Oe8SJ1r87Hr5a6znx3nJu1F2J/view) and put them under `~/data/reddit/`, or change paths in `utils.py`.
 
