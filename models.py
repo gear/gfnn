@@ -141,7 +141,7 @@ def get_model(model_opt, nfeat, nclass,
         model = SLG(nfeat=nfeat,
                     nclass=nclass,
                     dp=dropout)
-    elif model_opt == "SGCMLP":
+    elif model_opt == "gfnn":
         model = MLP(nfeat=nfeat,
                     nhid=nhid,
                     nclass=nclass,

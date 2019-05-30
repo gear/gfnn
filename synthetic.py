@@ -68,7 +68,7 @@ model = get_model(model_opt=args.model,
                   cuda=args.cuda,
                   degree=args.degree)
 
-if args.model == "SGC" or args.model == "SGCMLP": 
+if args.model == "SGC" or args.model == "gfnn": 
     features, precompute_time = sgc_precompute(features, adj, args.degree)
     print("{:.4f}s".format(precompute_time))
     model, acc_val, train_time = train_regression(model, 

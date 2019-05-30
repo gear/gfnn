@@ -30,7 +30,7 @@ sexy_models = [
     'GCN',
     'KGCN',
     'SLG',
-    'SGCMLP'
+    'gfnn'
 ]
 
 preps = [
