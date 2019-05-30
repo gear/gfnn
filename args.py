@@ -59,7 +59,7 @@ def get_feat_args():
     parser.add_argument('--feature', type=str, default="mul",
                         choices=['mul', 'cat', 'adj'],
                         help='feature-type')
-    parser.add_argument('--normalization', type=str, default='AugNormAdj',
+    parser.add_argument('--normalization', type=str, default='LeftNorm',
                        choices=normalization_choices,
                        help='Normalization method for the adjacency matrix.')
     parser.add_argument('--invlap_alpha', type=float, default=0.5,
@@ -101,7 +101,7 @@ def get_syn_args():
     parser.add_argument('--feature', type=str, default="mul",
                         choices=['mul', 'cat', 'adj'],
                         help='feature-type')
-    parser.add_argument('--normalization', type=str, default='AugNormAdj',
+    parser.add_argument('--normalization', type=str, default='LeftNorm',
                        choices=normalization_choices,
                        help='Normalization method for the adjacency matrix.')
     parser.add_argument('--invlap_alpha', type=float, default=0.5,
@@ -158,7 +158,7 @@ def get_citation_args():
     parser.add_argument('--feature', type=str, default="mul",
                         choices=['mul', 'cat', 'adj'],
                         help='feature-type')
-    parser.add_argument('--normalization', type=str, default='AugNormAdj',
+    parser.add_argument('--normalization', type=str, default='LeftNorm',
                        choices=normalization_choices,
                        help='Normalization method for the adjacency matrix.')
     parser.add_argument('--invlap_alpha', type=float, default=0.5,
