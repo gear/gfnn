@@ -27,14 +27,14 @@ Check `args.py` file to change options for noise and other filters.
 
 To run with Cora, Citeseer, Pubmed:
 ```python
-python citation.py --no-cuda --model gfNN --dataset cora
+python citation.py --no-cuda --model gfnn --dataset cora
 python citation.py --no-cuda --model SGC --dataset cora
 python citation.py --no-cuda --model GCN --dataset cora
 ```
 
 To run with synthetic dataset (4000 data points):
 ```python
-python synthetic.py --no-cuda --model gfNN
+python synthetic.py --no-cuda --model gfnn
 python synthetic.py --no-cuda --model SGC
 python synthetic.py --no-cuda --model GCN
 ```
