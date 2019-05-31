@@ -5,7 +5,7 @@ In this work, we study graph neural networks for vertex classification. This wor
 
 Create an Python 3.6 environment and install these packages:
 
-```python
+```bash
 numpy
 scipy
 networkx==1.11
@@ -26,14 +26,14 @@ We will pack data for PPI in the later version.
 Check `args.py` file to change options for noise and other filters.
 
 To run with Cora, Citeseer, Pubmed:
-```python
+```bash
 python citation.py --no-cuda --model gfnn --dataset cora
 python citation.py --no-cuda --model SGC --dataset cora
 python citation.py --no-cuda --model GCN --dataset cora
 ```
 
 To run with synthetic dataset (4000 data points):
-```python
+```bash
 python synthetic.py --no-cuda --model gfnn
 python synthetic.py --no-cuda --model SGC
 python synthetic.py --no-cuda --model GCN
