@@ -100,9 +100,11 @@ class MLP(Module):
         self.W1 = nn.Linear(nfeat, nhid)
         self.W2 = nn.Linear(nhid, nclass)
         self.dp = dp
+        self.act = nn.PReLU()
+        self.num_class = nclass
 
     def forward(self, x):
-        x = F.relu(self.W1(x))
+        x = self.act(self.W1(x))
         x = nn.Dropout(p=self.dp)(x)
         return self.W2(x)
         

@@ -11,7 +11,7 @@ from synthetic_data import make_donuts
 from time import perf_counter
 from torch.utils import data
 
-dataf = os.path.expanduser("~/data/")
+dataf = os.path.expanduser("./data/")
 
 def parse_index_file(filename):
     """Parse index file."""
@@ -38,9 +38,6 @@ def preprocess_synthetic(adj, features, normalization, extra=None):
     adj_normalizer = fetch_normalization(normalization, extra)
     adj = adj_normalizer(adj)
     return adj, features
-
-
-# TODO: Change the adj matrix by the left normalized matrix
 
 
 def sparse_mx_to_torch_sparse_tensor(sparse_mx):
@@ -240,6 +237,35 @@ class FeaturesData(data.Dataset):
         X = self.features[index]
         y = self.labels[index]
         return X, y
+
+
+class LowHighFreqData(torch.utils.data.Dataset):
+    def __init__(self, X_low, X_high, y):
+        self.labels = y
+        self.features_low = X_low
+        self.features_high = X_high
+        self.length = y.size(-1)
+    def __len__(self):
+        return self.length
+    def __getitem__(self, index):
+        Xl = self.features_low[index]
+        Xh = self.features_high[index]
+        y = self.labels[index]
+        return Xl, Xh, y
+
+
+def low_high_data_loader(X_train_low, X_train_high, y_train, 
+                         X_val_low, X_val_high, y_val, batch_size=32):
+    train_set = LowHighFreqData(X_train_low, X_train_high, y_train)
+    val_set = LowHighFreqData(X_val_low, X_val_high, y_val)
+    trainLoader = torch.utils.data.DataLoader(dataset=train_set, 
+                                              batch_size=batch_size, 
+                                              shuffle=True)
+    valLoader = torch.utils.data.DataLoader(dataset=val_set, 
+                                            batch_size=batch_size, 
+                                            shuffle=False)
+    return trainLoader, valLoader
+
 
 def get_data_loaders(X_train, y_train, X_val, y_val, batch_size=32):
     train_set = FeaturesData(X_train, y_train)
