@@ -15,7 +15,7 @@ from noise import gaussian, gaussian_mimic,\
                   superimpose_gaussian_random, zero_idx
 from train import train_regression, test_regression,\
                   train_gcn, test_gcn,\
-                  train_kgcn, test_kgcn, train_mlp
+                  train_kgcn, test_kgcn, train_mlp, train_gfnn
 
 # Arguments
 args = get_citation_args()
@@ -106,16 +106,17 @@ if args.model == "SGC" or args.model == "gfnn":
     features, precompute_time = sgc_precompute(features, adj, args.degree)
     print("{:.4f}s".format(precompute_time))
     if args.model == "gfnn":
-        model, acc_val, train_time = train_mlp(model, 
-                                               features[idx_train],
-                                               labels[idx_train], 
-                                               features[idx_val], 
-                                               labels[idx_val],
-                                               args.epochs,
-                                               args.weight_decay, 
-                                               args.lr, 
-                                               args.dropout,
-                                               args.batch_size)
+        model, acc_val, train_time = train_gfnn(model, 
+                                                features[idx_train],
+                                                labels[idx_train], 
+                                                features[idx_val], 
+                                                labels[idx_val],
+                                                epochs=args.epochs, 
+                                                weight_decay=args.weight_decay, 
+                                                lr=args.lr, 
+                                                bs=args.batch_size,
+                                                patience=10,
+                                                verbose=True)
     else:
         model, acc_val, train_time = train_regression(model, 
                                                       features[idx_train],

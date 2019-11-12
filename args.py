@@ -47,7 +47,7 @@ def get_feat_args():
                         help='Number of epochs to train.')
     parser.add_argument('--lr', type=float, default=0.1,
                         help='Initial learning rate.')
-    parser.add_argument('--weight_decay', type=float, default=5e-6,
+    parser.add_argument('--weight_decay', type=float, default=1e-4,
                         help='Weight decay (L2 loss on parameters).')
     parser.add_argument('--hidden', type=int, default=32,
                         help='Number of hidden units.')
@@ -140,11 +140,11 @@ def get_citation_args():
     parser.add_argument('--no-cuda', action='store_true', default=False,
                         help='Disables CUDA training.')
     parser.add_argument('--seed', type=int, default=1, help='Random seed.')
-    parser.add_argument('--epochs', type=int, default=50,
+    parser.add_argument('--epochs', type=int, default=200,
                         help='Number of epochs to train.')
     parser.add_argument('--lr', type=float, default=0.1,
                         help='Initial learning rate.')
-    parser.add_argument('--weight_decay', type=float, default=5e-6,
+    parser.add_argument('--weight_decay', type=float, default=1e-4,
                         help='Weight decay (L2 loss on parameters).')
     parser.add_argument('--hidden', type=int, default=32,
                         help='Number of hidden units.')
