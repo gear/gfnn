@@ -1,0 +1,3 @@
+notebook/
+__pycache__/
+*.pkl
