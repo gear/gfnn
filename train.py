@@ -96,7 +96,7 @@ def train_gfnn(model,
             best = acc_val
             best_ep = epoch
             wait = 0
-            torch.save(model.state_dict(), 'best_gfnn.plk')
+            torch.save(model.state_dict(), 'best_gfnn.pkl')
         else:
             wait += 1
         if wait == patience:
