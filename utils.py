@@ -11,7 +11,7 @@ from synthetic_data import make_donuts
 from time import perf_counter
 from torch.utils import data
 
-dataf = os.path.expanduser("./data/")
+dataf = os.path.expanduser("{}/data/".format(os.path.dirname(__file__)))
 
 def parse_index_file(filename):
     """Parse index file."""
