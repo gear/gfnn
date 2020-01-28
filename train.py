@@ -105,7 +105,7 @@ def train_gfnn(model,
     train_time = perf_counter()-t
     with torch.no_grad():
         print("Loading and return the model at best epoch {}".format(best_ep))
-        model.load_state_dict(torch.load('best_gfnn.plk'))
+        model.load_state_dict(torch.load('best_gfnn.pkl'))
         model.eval()
         corrects = 0
         for xl, y in val_loader:
