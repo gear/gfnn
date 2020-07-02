@@ -12,6 +12,15 @@ def aug_normalized_adjacency(adj):
    d_mat_inv_sqrt = sp.diags(d_inv_sqrt)
    return d_mat_inv_sqrt.dot(adj).dot(d_mat_inv_sqrt).tocoo()
 
+def abs_rw_normalized_adjacency(adj): 
+   adj = adj + sp.eye(adj.shape[0])
+   adj = sp.coo_matrix(adj)
+   row_sum = np.array(adj.sum(1))
+   d_inv = np.power(row_sum, -1).flatten()
+   d_inv[np.isinf(d_inv)] = 0.
+   d_mat_inv = sp.diags(d_inv)
+   return np.abs(d_mat_inv.dot(adj).tocoo())
+
 def rw_normalized_adjacency(adj): 
    adj = adj + sp.eye(adj.shape[0])
    adj = sp.coo_matrix(adj)
@@ -62,6 +71,7 @@ def fetch_normalization(type, extra=None):
        'InvLap': lambda adj: inv_normalized_laplacian(adj, extra),
        'CombLap': comb_laplacian,
        'SymNormLap': sym_normalized_laplacian,
+       'AbsAdj': abs_rw_normalized_adjacency,
        '': lambda x: x
    }
    func = switcher.get(type, lambda: "Invalid normalization technique.")

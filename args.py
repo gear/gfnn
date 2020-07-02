@@ -20,7 +20,8 @@ normalization_choices = [
     'LeftNorm',
     'InvLap',
     'CombLap',
-    'SymNormLap'
+    'SymNormLap',
+    'AbsAdj'
 ]
 
 # "All neural network models should go to work at Victoria's Secret

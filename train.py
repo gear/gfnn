@@ -55,7 +55,7 @@ def train_gfnn(model,
                weight_decay, 
                lr, 
                bs,
-               patience=10,
+               patience=50,
                verbose=True):
     optimizer = optim.Adam(model.parameters(),
                            lr=lr,

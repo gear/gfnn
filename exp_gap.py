@@ -10,9 +10,6 @@ from metrics import accuracy
 import pickle as pkl
 from args import get_citation_args
 from time import perf_counter
-from noise import gaussian, gaussian_mimic,\
-                  superimpose_gaussian, superimpose_gaussian_class,\
-                  superimpose_gaussian_random, zero_idx
 from train import train_regression, test_regression,\
                   train_gcn, test_gcn,\
                   train_kgcn, test_kgcn, train_mlp, train_gfnn
@@ -37,56 +34,6 @@ idx_val, idx_test = load_citation(args.dataset,
                                   args.cuda,
                                   args.invlap_alpha,
                                   args.shuffle)
-
-### NOISE TO FEATURES
-if args.noise != "None":
-    features = features.numpy()
-
-if args.noise == "gaussian":
-    features = gaussian(features,
-                        mean=args.gaussian_opt[0],
-                        std=args.gaussian_opt[1])
-if args.noise == "gaussian_mimic":
-    features = gaussian_mimic(features)
-if args.noise == "add_gaussian":
-    features = gaussian(features, 
-                        mean=args.gaussian_opt[0],
-                        std=args.gaussian_opt[1],
-                        add=True)
-if args.noise == "add_gaussian_mimic":
-    features = gaussian_mimic(features, add=True)
-if args.noise == "superimpose_gaussian":
-    features = superimpose_gaussian(features, args.superimpose_k)
-if args.noise == "superimpose_gaussian_class":
-    labels = labels.numpy()
-    features = superimpose_gaussian_class(features, labels)
-    labels = torch.LongTensor(labels)
-    if args.cuda:
-        labels = labels.cuda()
-if args.noise == "superimpose_gaussian_random":
-    features = superimpose_gaussian_random(features, args.superimpose_k)
-if args.noise == "zero_test":
-    idx_test = idx_test.numpy()
-    features = zero_idx(features, idx_test)
-    idx_test = torch.LongTensor(idx_test)
-    if args.cuda:
-        idx_test = idx_test.cuda()
-
-if args.noise != "None":
-    features = torch.FloatTensor(features).float()
-    if args.cuda:
-        features = features.cuda()
-### END NOISE TO FEATURES
-
-
-### STACKED FEATURES
-#if args.stacked_feature:
-#    #features = features.numpy()
-#    features = stack_feat(features, adj, args.degree)
-#    features = torch.FloatTensor(features).float()
-#    if args.cuda:
-#        features = features.cuda()
-### END STACKED FEATURES
 
 # Monkey patch for Stacked Logistic Regression
 if args.model == "SLG":
@@ -115,7 +62,7 @@ if args.model == "SGC" or args.model == "gfnn":
                                                 weight_decay=args.weight_decay, 
                                                 lr=args.lr, 
                                                 bs=args.batch_size,
-                                                patience=50,
+                                                patience=10,
                                                 verbose=True)
     else:
         model, acc_val, train_time = train_regression(model, 

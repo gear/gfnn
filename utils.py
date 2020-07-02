@@ -10,6 +10,7 @@ from normalization import fetch_normalization, row_normalize
 from synthetic_data import make_donuts
 from time import perf_counter
 from torch.utils import data
+from sklearn.model_selection import train_test_split
 
 dataf = os.path.expanduser("{}/data/".format(os.path.dirname(__file__)))
 
@@ -28,9 +29,10 @@ def preprocess_citation(adj, features, normalization, extra=None):
     #row_sum = np.array(adj.sum(1))
     #features = row_sum
     #features = features.todense()
-    #features = np.concatenate([features, row_sum], axis=1)
+    #features = np.concatenate([features, row_sum], axis=1) 
     #features = sp.lil_matrix(features)
-    features = row_normalize(features)
+    if normalization != "":
+        features = row_normalize(features)
     return adj, features
 
 
@@ -53,7 +55,8 @@ def load_citation(dataset_str="cora",
                   normalization="AugNormAdj", 
                   cuda=True, 
                   extra=None,
-                  shuffle=False):
+                  shuffle=False,
+                  train_test_val=True):
     """
     Load Citation Networks Datasets.
     """
@@ -116,6 +119,15 @@ def load_citation(dataset_str="cora",
     idx_val = torch.LongTensor(idx_val)
     idx_test = torch.LongTensor(idx_test)
 
+    if train_test_val:
+        idx_train, idx_val, idx_test = \
+                       train_val_test_split_tabular(np.arange(labels.size(0)),
+                                                    train_size=0.1, 
+                                                    val_size=0.1, 
+                                                    test_size=0.8,
+                                                    stratify=labels.numpy().ravel(), 
+                                                    random_state=None)        
+
     if cuda:
         features = features.cuda()
         adj = adj.cuda()
@@ -125,6 +137,36 @@ def load_citation(dataset_str="cora",
         idx_test = idx_test.cuda()
 
     return adj, features, labels, idx_train, idx_val, idx_test
+
+
+def train_val_test_split_tabular(*arrays, 
+                                 train_size=0.5, 
+                                 val_size=0.3, 
+                                 test_size=0.2, 
+                                 stratify=None, 
+                                 random_state=None):
+
+    if len(set(array.shape[0] for array in arrays)) != 1:
+        raise ValueError("Arrays must have equal first dimension.")
+    idx = np.arange(arrays[0].shape[0])
+    idx_train_and_val, idx_test = train_test_split(idx,
+                                                   random_state=random_state,
+                                                   train_size=(train_size + val_size),
+                                                   test_size=test_size,
+                                                   stratify=stratify)
+    if stratify is not None:
+        stratify = stratify[idx_train_and_val]
+    idx_train, idx_val = train_test_split(idx_train_and_val,
+                                          random_state=random_state,
+                                          train_size=(train_size / (train_size + val_size)),
+                                          test_size=(val_size / (train_size + val_size)),
+                                          stratify=stratify)
+    result = []
+    for X in arrays:
+        result.append(X[idx_train])
+        result.append(X[idx_val])
+        result.append(X[idx_test])
+    return result
 
 
 def load_donuts(n=4000, 
