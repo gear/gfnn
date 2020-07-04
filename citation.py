@@ -116,7 +116,7 @@ if args.model == "SGC" or args.model == "gfnn":
                                                 lr=args.lr, 
                                                 bs=args.batch_size,
                                                 patience=50,
-                                                verbose=True)
+                                                verbose=False)
     else:
         model, acc_val, train_time = train_regression(model, 
                                                       features[idx_train],

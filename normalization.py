@@ -3,6 +3,20 @@ import scipy.sparse as sp
 import torch
 
 
+def fetch_normalization(type, extra=None):
+   switcher = {
+       'AugNormAdj': aug_normalized_adjacency, 
+       'LeftNorm': rw_normalized_adjacency,
+       'InvLap': lambda adj: inv_normalized_laplacian(adj, extra),
+       'CombLap': comb_laplacian,
+       'SymNormLap': sym_normalized_laplacian,
+       'AbsAdj': abs_rw_normalized_adjacency,
+       '': lambda x: x
+   }
+   func = switcher.get(type, lambda: "Invalid normalization technique.")
+   return func
+
+
 def aug_normalized_adjacency(adj):
    adj = adj + sp.eye(adj.shape[0])
    adj = sp.coo_matrix(adj)
@@ -64,18 +78,6 @@ def comb_laplacian(adj, scale=False):
    L = sp.coo_matrix(L)
    return L
 
-def fetch_normalization(type, extra=None):
-   switcher = {
-       'AugNormAdj': aug_normalized_adjacency, 
-       'LeftNorm': rw_normalized_adjacency,
-       'InvLap': lambda adj: inv_normalized_laplacian(adj, extra),
-       'CombLap': comb_laplacian,
-       'SymNormLap': sym_normalized_laplacian,
-       'AbsAdj': abs_rw_normalized_adjacency,
-       '': lambda x: x
-   }
-   func = switcher.get(type, lambda: "Invalid normalization technique.")
-   return func
 
 def row_normalize(mx):
     """Row-normalize sparse matrix"""

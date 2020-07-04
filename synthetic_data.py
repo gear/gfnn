@@ -37,3 +37,9 @@ def make_donuts(n=4000,
         mesh_adj = make_graph(mesh_X, nneigh)  # Might take a long time
     mesh_pack = (mesh_adj, mesh_X, xx, yy)
     return adj, X, y, train_index, test_index, test_index, mesh_pack
+
+
+def make_bipartite(n=2000,
+                   feature='noise',
+                   feature_dim=20):
+    pass 
