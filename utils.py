@@ -14,6 +14,7 @@ from sklearn.model_selection import train_test_split
 
 dataf = os.path.expanduser("{}/data/".format(os.path.dirname(__file__)))
 
+
 def parse_index_file(filename):
     """Parse index file."""
     index = []
@@ -51,12 +52,70 @@ def sparse_mx_to_torch_sparse_tensor(sparse_mx):
     shape = torch.Size(sparse_mx.shape)
     return torch.sparse.FloatTensor(indices, values, shape)
 
+
+def load_data(dataset_str="cora",
+              normalization=[],
+              feat_normalize=True,
+              cuda=False,
+              split="default",
+              **kwargs):
+    """
+    Load pickle packed datasets.
+    """
+    with open(dataf+dataset_str+".graph", "rb") as f:
+        graph = pkl.load(f)
+    with open(dataf+dataset_str+".X", "rb") as f:
+        X = pkl.load(f)
+    with open(dataf+dataset_str+".y", "rb") as f:
+        y = pkl.load(f)
+    if split != "default":
+        tr_size, va_size, te_size = [float(i) for i in split.split("_")]
+        idx_train, idx_val, idx_test = \
+            train_val_test_split(np.arange(len(y)), train_size=tr_size,
+                                 val_size=va_size, test_size=te_size,
+                                 stratify=y, random_state=None) 
+    else:
+        with open(dataf+dataset_str+".split", "rb") as f:
+            split = pkl.load(f)
+            idx_train = split['train']
+            idx_test = split['test']
+            idx_val = split['valid']
+
+    normed_adj = []
+    if len(normalization) > 0:
+        adj = nx.adj_matrix(graph)
+        for n in normalization:
+            nf = fetch_normalization(n, **kwargs)
+            normed_adj.append(nf(adj))
+
+    if feat_normalize:
+        X = row_normalize(X)
+
+    X = torch.FloatTensor(X).float()
+    y = torch.LongTensor(y)
+    normed_adj = [sparse_mx_to_torch_sparse_tensor(adj).float() \
+                  for adj in normed_adj]
+    idx_train = torch.LongTensor(idx_train)
+    idx_val = torch.LongTensor(idx_val)
+    idx_test = torch.LongTensor(idx_test)
+
+    if cuda:
+        X = X.cuda()
+        normed_adj = [adj.cuda() for adj in normed_adj]
+        y = y.cuda()
+        idx_train = idx_train.cuda()
+        idx_val = idx_val.cuda()
+        idx_test = idx_test.cuda()
+
+    return graph, normed_adj, X, y, idx_train, idx_val, idx_test
+
+
 def load_citation(dataset_str="cora", 
                   normalization="AugNormAdj", 
                   cuda=True, 
                   extra=None,
                   shuffle=False,
-                  train_test_val=True):
+                  train_test_val=False):
     """
     Load Citation Networks Datasets.
     """
@@ -139,12 +198,12 @@ def load_citation(dataset_str="cora",
     return adj, features, labels, idx_train, idx_val, idx_test
 
 
-def train_val_test_split_tabular(*arrays, 
-                                 train_size=0.5, 
-                                 val_size=0.3, 
-                                 test_size=0.2, 
-                                 stratify=None, 
-                                 random_state=None):
+def train_val_test_split(*arrays, 
+                         train_size=0.5, 
+                         val_size=0.3, 
+                         test_size=0.2, 
+                         stratify=None, 
+                         random_state=None):
 
     if len(set(array.shape[0] for array in arrays)) != 1:
         raise ValueError("Arrays must have equal first dimension.")
