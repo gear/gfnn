@@ -58,6 +58,7 @@ def load_data(dataset_str="cora",
               feat_normalize=True,
               cuda=False,
               split="default",
+              random_state=None,
               **kwargs):
     """
     Load pickle packed datasets.
@@ -73,7 +74,7 @@ def load_data(dataset_str="cora",
         idx_train, idx_val, idx_test = \
             train_val_test_split(np.arange(len(y)), train_size=tr_size,
                                  val_size=va_size, test_size=te_size,
-                                 stratify=y, random_state=None) 
+                                 stratify=y, random_state=random_state) 
     else:
         with open(dataf+dataset_str+".split", "rb") as f:
             split = pkl.load(f)
