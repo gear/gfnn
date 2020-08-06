@@ -115,8 +115,8 @@ if args.model == "SGC" or args.model == "gfnn":
                                                 weight_decay=args.weight_decay, 
                                                 lr=args.lr, 
                                                 bs=args.batch_size,
-                                                patience=50,
-                                                verbose=False)
+                                                patience=800,
+                                                verbose=True)
     else:
         model, acc_val, train_time = train_regression(model, 
                                                       features[idx_train],

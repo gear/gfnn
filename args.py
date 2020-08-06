@@ -136,16 +136,16 @@ def get_syn_args():
     args.cuda = not args.no_cuda and torch.cuda.is_available()
     return args
 
-def get_citation_args():
+def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--no-cuda', action='store_true', default=False,
                         help='Disables CUDA training.')
     parser.add_argument('--seed', type=int, default=1, help='Random seed.')
     parser.add_argument('--epochs', type=int, default=200,
                         help='Number of epochs to train.')
-    parser.add_argument('--lr', type=float, default=0.1,
+    parser.add_argument('--lr', type=float, default=0.001,
                         help='Initial learning rate.')
-    parser.add_argument('--weight_decay', type=float, default=1e-4,
+    parser.add_argument('--weight_decay', type=float, default=1e-5,
                         help='Weight decay (L2 loss on parameters).')
     parser.add_argument('--hidden', type=int, default=32,
                         help='Number of hidden units.')
@@ -153,33 +153,14 @@ def get_citation_args():
                         help='Dropout rate (1 - keep probability).')
     parser.add_argument('--dataset', type=str, default="cora",
                         help='Dataset to use.')
-    parser.add_argument('--model', type=str, default="SGC",
-                        choices=sexy_models,
-                        help='model to use.')
-    parser.add_argument('--feature', type=str, default="mul",
-                        choices=['mul', 'cat', 'adj'],
-                        help='feature-type')
-    parser.add_argument('--normalization', type=str, default='LeftNorm',
+    parser.add_argument('--normalization', type=str, default='RwAdj',
                        choices=normalization_choices,
                        help='Normalization method for the adjacency matrix.')
-    parser.add_argument('--invlap_alpha', type=float, default=0.5,
-                        help='alpha parameter for InvLap norm.')
     parser.add_argument('--degree', type=int, default=2,
                         help='degree of the approximation.')
     parser.add_argument('--per', type=int, default=-1,
                         help='Number of each nodes so as to balance.')
-    parser.add_argument('--experiment', type=str, default="base-experiment",
-                        help='feature-type')
-    parser.add_argument('--tuned', action='store_true', 
-                        help='use tuned hyperparams')
-    parser.add_argument('--noise', type=str, default='None', 
-                        choices=noise_choices, help='noise settings')
-    parser.add_argument('--gaussian_opt', type=float, nargs=2, 
-                        default=[0.0, 1.0], help="mean and var for gaussian")
-    parser.add_argument('--superimpose_k', type=float, default=1.5, 
-                        help="extends feature vecs by k times")
     parser.add_argument('--batch_size', type=int, default=32)
-    parser.add_argument('--shuffle', action='store_true')
 
     args, _ = parser.parse_known_args()
     args.cuda = not args.no_cuda and torch.cuda.is_available()

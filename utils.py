@@ -110,94 +110,6 @@ def load_data(dataset_str="cora",
     return graph, normed_adj, X, y, idx_train, idx_val, idx_test
 
 
-def load_citation(dataset_str="cora", 
-                  normalization="AugNormAdj", 
-                  cuda=True, 
-                  extra=None,
-                  shuffle=False,
-                  train_test_val=False):
-    """
-    Load Citation Networks Datasets.
-    """
-    names = ['x', 'y', 'tx', 'ty', 'allx', 'ally', 'graph']
-    objects = []
-    for i in range(len(names)):
-        with open(dataf+"gcn/ind.{}.{}".format(dataset_str.lower(), names[i]), 'rb') as f:
-            if sys.version_info > (3, 0):
-                objects.append(pkl.load(f, encoding='latin1'))
-            else:
-                objects.append(pkl.load(f))
-
-    x, y, tx, ty, allx, ally, graph = tuple(objects)
-    test_idx_reorder = parse_index_file(dataf+"gcn/ind.{}.test.index".format(dataset_str))
-    test_idx_range = np.sort(test_idx_reorder)
-
-    if dataset_str == 'citeseer':
-        # Fix citeseer dataset (there are some isolated nodes in the graph)
-        # Find isolated nodes, add them as zero-vecs into the right position
-        test_idx_range_full = range(min(test_idx_reorder), max(test_idx_reorder)+1)
-        tx_extended = sp.lil_matrix((len(test_idx_range_full), x.shape[1]))
-        tx_extended[test_idx_range-min(test_idx_range), :] = tx
-        tx = tx_extended
-        ty_extended = np.zeros((len(test_idx_range_full), y.shape[1]))
-        ty_extended[test_idx_range-min(test_idx_range), :] = ty
-        ty = ty_extended
-
-    features = sp.vstack((allx, tx)).tolil()
-    features[test_idx_reorder, :] = features[test_idx_range, :]
-    adj = nx.adjacency_matrix(nx.from_dict_of_lists(graph))
-    adj = adj + adj.T.multiply(adj.T > adj) - adj.multiply(adj.T > adj)
-    labels = np.vstack((ally, ty))
-    labels[test_idx_reorder, :] = labels[test_idx_range, :]
-
-    idx_test = test_idx_range.tolist()
-    idx_train = range(len(y))
-    idx_val = range(len(y), len(y)+500)
-
-    if shuffle:
-        n = len(idx_test) + len(idx_train) + len(idx_val)
-        ids = [*range(n)]
-        random.shuffle(ids)
-        nidx_test = ids[:len(idx_test)]
-        nidx_train = ids[len(idx_test):len(idx_test)+len(idx_train)]
-        nidx_val = ids[len(idx_test)+len(idx_train):]
-
-        idx_test = nidx_test
-        idx_train = nidx_train
-        idx_val = nidx_val
-        
-
-    adj, features = preprocess_citation(adj, features, normalization, extra)
-
-    # porting to pytorch
-    features = torch.FloatTensor(np.array(features.todense())).float()
-    labels = torch.LongTensor(labels)
-    labels = torch.max(labels, dim=1)[1]
-    adj = sparse_mx_to_torch_sparse_tensor(adj).float()
-    idx_train = torch.LongTensor(idx_train)
-    idx_val = torch.LongTensor(idx_val)
-    idx_test = torch.LongTensor(idx_test)
-
-    if train_test_val:
-        idx_train, idx_val, idx_test = \
-                       train_val_test_split_tabular(np.arange(labels.size(0)),
-                                                    train_size=0.1, 
-                                                    val_size=0.1, 
-                                                    test_size=0.8,
-                                                    stratify=labels.numpy().ravel(), 
-                                                    random_state=None)        
-
-    if cuda:
-        features = features.cuda()
-        adj = adj.cuda()
-        labels = labels.cuda()
-        idx_train = idx_train.cuda()
-        idx_val = idx_val.cuda()
-        idx_test = idx_test.cuda()
-
-    return adj, features, labels, idx_train, idx_val, idx_test
-
-
 def train_val_test_split(*arrays, 
                          train_size=0.5, 
                          val_size=0.3, 
@@ -374,3 +286,92 @@ def get_data_loaders(X_train, y_train, X_val, y_val, batch_size=32):
     trainLoader = data.DataLoader(dataset=train_set, batch_size=batch_size, shuffle=True)
     valLoader = data.DataLoader(dataset=val_set, batch_size=batch_size, shuffle=False)
     return trainLoader, valLoader
+
+
+# def load_citation(dataset_str="cora", 
+#                   normalization="AugNormAdj", 
+#                   cuda=True, 
+#                   extra=None,
+#                   shuffle=False,
+#                   train_test_val=False):
+#     """
+#     Load Citation Networks Datasets.
+#     """
+#     names = ['x', 'y', 'tx', 'ty', 'allx', 'ally', 'graph']
+#     objects = []
+#     for i in range(len(names)):
+#         with open(dataf+"gcn/ind.{}.{}".format(dataset_str.lower(), names[i]), 'rb') as f:
+#             if sys.version_info > (3, 0):
+#                 objects.append(pkl.load(f, encoding='latin1'))
+#             else:
+#                 objects.append(pkl.load(f))
+# 
+#     x, y, tx, ty, allx, ally, graph = tuple(objects)
+#     test_idx_reorder = parse_index_file(dataf+"gcn/ind.{}.test.index".format(dataset_str))
+#     test_idx_range = np.sort(test_idx_reorder)
+# 
+#     if dataset_str == 'citeseer':
+#         # Fix citeseer dataset (there are some isolated nodes in the graph)
+#         # Find isolated nodes, add them as zero-vecs into the right position
+#         test_idx_range_full = range(min(test_idx_reorder), max(test_idx_reorder)+1)
+#         tx_extended = sp.lil_matrix((len(test_idx_range_full), x.shape[1]))
+#         tx_extended[test_idx_range-min(test_idx_range), :] = tx
+#         tx = tx_extended
+#         ty_extended = np.zeros((len(test_idx_range_full), y.shape[1]))
+#         ty_extended[test_idx_range-min(test_idx_range), :] = ty
+#         ty = ty_extended
+# 
+#     features = sp.vstack((allx, tx)).tolil()
+#     features[test_idx_reorder, :] = features[test_idx_range, :]
+#     adj = nx.adjacency_matrix(nx.from_dict_of_lists(graph))
+#     adj = adj + adj.T.multiply(adj.T > adj) - adj.multiply(adj.T > adj)
+#     labels = np.vstack((ally, ty))
+#     labels[test_idx_reorder, :] = labels[test_idx_range, :]
+# 
+#     idx_test = test_idx_range.tolist()
+#     idx_train = range(len(y))
+#     idx_val = range(len(y), len(y)+500)
+# 
+#     if shuffle:
+#         n = len(idx_test) + len(idx_train) + len(idx_val)
+#         ids = [*range(n)]
+#         random.shuffle(ids)
+#         nidx_test = ids[:len(idx_test)]
+#         nidx_train = ids[len(idx_test):len(idx_test)+len(idx_train)]
+#         nidx_val = ids[len(idx_test)+len(idx_train):]
+# 
+#         idx_test = nidx_test
+#         idx_train = nidx_train
+#         idx_val = nidx_val
+#         
+# 
+#     adj, features = preprocess_citation(adj, features, normalization, extra)
+# 
+#     # porting to pytorch
+#     features = torch.FloatTensor(np.array(features.todense())).float()
+#     labels = torch.LongTensor(labels)
+#     labels = torch.max(labels, dim=1)[1]
+#     adj = sparse_mx_to_torch_sparse_tensor(adj).float()
+#     idx_train = torch.LongTensor(idx_train)
+#     idx_val = torch.LongTensor(idx_val)
+#     idx_test = torch.LongTensor(idx_test)
+# 
+#     if train_test_val:
+#         idx_train, idx_val, idx_test = \
+#                        train_val_test_split_tabular(np.arange(labels.size(0)),
+#                                                     train_size=0.1, 
+#                                                     val_size=0.1, 
+#                                                     test_size=0.8,
+#                                                     stratify=labels.numpy().ravel(), 
+#                                                     random_state=None)        
+# 
+#     if cuda:
+#         features = features.cuda()
+#         adj = adj.cuda()
+#         labels = labels.cuda()
+#         idx_train = idx_train.cuda()
+#         idx_val = idx_val.cuda()
+#         idx_test = idx_test.cuda()
+# 
+#     return adj, features, labels, idx_train, idx_val, idx_test
+

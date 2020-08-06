@@ -3,19 +3,17 @@ import scipy.sparse as sp
 import torch
 
 
-def fetch_normalization(type, extra=None):
+def fetch_normalization(type, **kwargs):
    switcher = {
        'AugNormAdj': aug_normalized_adjacency, 
-       'LeftNorm': rw_normalized_adjacency,
-       'InvLap': lambda adj: inv_normalized_laplacian(adj, extra),
+       'RwNorm': rw_normalized_adjacency,
+       'InvLap': lambda adj: inv_normalized_laplacian(adj, **kwargs),
        'CombLap': comb_laplacian,
        'SymNormLap': sym_normalized_laplacian,
-       'AbsAdj': abs_rw_normalized_adjacency,
-       '': lambda x: x
+       'AbsRwNormAdj': abs_rw_normalized_adjacency
    }
-   func = switcher.get(type, lambda: "Invalid normalization technique.")
+   func = switcher.get(type, lambda x: x)
    return func
-
 
 def aug_normalized_adjacency(adj):
    adj = adj + sp.eye(adj.shape[0])
@@ -55,7 +53,6 @@ def sym_normalized_laplacian(adj):
    return d_mat_inv.dot(L).dot(d_mat_inv).tocoo()
 
 def inv_normalized_laplacian(adj, alpha=0.8):
-   #adj = adj + sp.eye(adj.shape[0])
    adj = sp.coo_matrix(adj)
    row_sum = np.array(adj.sum(1))
    d_mat = sp.diags(row_sum.flatten())
@@ -67,8 +64,6 @@ def inv_normalized_laplacian(adj, alpha=0.8):
    return term.dot(term)
 
 def comb_laplacian(adj, scale=False):
-   #adj = adj + sp.eye(adj.shape[0])
-   #adj = sp.coo_matrix(adj)
    row_sum = np.array(adj.sum(1))
    d = sp.diags(row_sum.flatten())
    L = (d - adj).todense()
@@ -77,7 +72,6 @@ def comb_laplacian(adj, scale=False):
       L = L / max_eigval
    L = sp.coo_matrix(L)
    return L
-
 
 def row_normalize(mx):
     """Row-normalize sparse matrix"""
